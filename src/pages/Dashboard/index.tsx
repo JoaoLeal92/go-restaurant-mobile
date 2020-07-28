@@ -55,11 +55,31 @@ const Dashboard: React.FC = () => {
 
   async function handleNavigate(id: number): Promise<void> {
     // Navigate do ProductDetails page
+    navigation.navigate('FoodDetails', { id });
   }
 
   useEffect(() => {
     async function loadFoods(): Promise<void> {
       // Load Foods from API
+      const response = await api.get('/foods', {
+        params: {
+          name_like: searchValue,
+          category_like: selectedCategory,
+        },
+      });
+
+      const apiFoods = response.data;
+
+      const formattedFoods = apiFoods.map(food => {
+        const formattedPrice = formatValue(food.price);
+
+        return {
+          formattedPrice,
+          ...food,
+        };
+      });
+
+      setFoods(formattedFoods);
     }
 
     loadFoods();
@@ -68,6 +88,11 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     async function loadCategories(): Promise<void> {
       // Load categories from API
+      const response = await api.get('/categories');
+
+      const apiCategories = response.data;
+
+      setCategories(apiCategories);
     }
 
     loadCategories();
@@ -75,6 +100,11 @@ const Dashboard: React.FC = () => {
 
   function handleSelectCategory(id: number): void {
     // Select / deselect category
+    if (id === selectedCategory) {
+      setSelectedCategory(undefined);
+    } else {
+      setSelectedCategory(id);
+    }
   }
 
   return (
